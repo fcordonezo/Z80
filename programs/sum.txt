@@ -1,0 +1,3 @@
+LD B,A3
+LD A,50
+ADD A,B
