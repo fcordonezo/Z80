@@ -13,7 +13,9 @@ import java.util.HashMap;
 
 /**
  *
- * @author Camilo
+ * @author Fabián Ordóñez
+ * Jair Villalba
+ * Luis Guzman
  */
 class Processor {
     private HashMap<String, String> registers;
@@ -67,29 +69,24 @@ class Processor {
                     registers.put( "Init", lexer.lexeme.split(" ")[1] );
                     break;
                 case LD1:
-                    //System.out.println(lexer.lexeme);
                     registers.put( lexer.lexeme.split( " " )[1].split( "," )[0], 
                         registers.get( lexer.lexeme.split( " " )[1].split( "," )[1] ) );
                     break;
                 case LD2:
-                    System.out.println(lexer.lexeme);
                     registers.put(lexer.lexeme.split(" ")[1].split(",")[0],
                         lexer.lexeme.split(" ")[1].split(",")[1]);
                     break;
                 case LD3:
-                    //System.out.println(lexer.lexeme);
                     registers.put(lexer.lexeme.split(" ")[1].split(",")[0].substring(0, 1), 
                         registers.get(lexer.lexeme.split(" ")[1].split(",")[1].substring(2, 3)));
                     registers.put(lexer.lexeme.split(" ")[1].split(",")[0].substring(1, 2), 
                         registers.get(lexer.lexeme.split(" ")[1].split(",")[1].substring(0, 1)));
                     break;
                 case LD4:
-                    //System.out.println(lexer.lexeme);
                     memory.put(lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", ""), 
                         lexer.lexeme.split(" ")[1].split(",")[1]);
                     break;
                 case LD5:
-                    //System.out.println(lexer.lexeme);
                     memory.put(lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", "").substring(0, 2), 
                         lexer.lexeme.split(" ")[1].split(",")[1].substring(2, 4));
                     memory.put(lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", "").substring(2, 4), 

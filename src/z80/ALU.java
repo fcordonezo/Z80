@@ -7,7 +7,9 @@ package z80;
 
 /**
  *
- * @author Camilo
+ * @author Fabián Ordóñez
+ * Jair Villalba
+ * Luis Guzman
  */
 class ALU {
     private static ALU alu;

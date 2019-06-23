@@ -9,9 +9,10 @@ import java.io.File;
 
 /**
  *
- * @author Camilo
+ * @author Fabián Ordóñez
+ * Jair Villalba
+ * Luis Guzman
  */
-
 //Con esta clase se toma el archivo .flex y se genera el archivo correspondiente .java
 public class GenerateLexer {
 

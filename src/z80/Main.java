@@ -15,7 +15,9 @@ import jflex.ErrorMessages;
 
 /**
  *
- * @author Camilo
+ * @author Fabián Ordóñez
+ * Jair Villalba
+ * Luis Guzman
  */
 
 //Con esta clase se toma el archivo .flex y se genera el archivo correspondiente .java
