@@ -15,7 +15,7 @@ import java.util.HashMap;
  *
  * @author Camilo
  */
-public class Processor {
+class Processor {
     private HashMap<String, String> registers;
     private HashMap<String, String> memory;
     private String file;

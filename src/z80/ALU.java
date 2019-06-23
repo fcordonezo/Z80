@@ -9,7 +9,7 @@ package z80;
  *
  * @author Camilo
  */
-public class ALU {
+class ALU {
     private static ALU alu;
     public static ALU getALU(){
         if( alu == null ){
