@@ -28,8 +28,8 @@ espacio = [\t\r\n]
 "LD "{REG}{1}","{REG}{1} {lexeme = yytext(); return LD1;}
 "LD "{REG}{1}","{H}{2} {lexeme = yytext(); return LD2;}
 "LD "{REG}{2}","{H}{4} {lexeme = yytext(); return LD3;}
-"LD ("{H}{2}"),"{H}{2} {lexeme = yytext(); return LD4;}
-"LD ("{H}{4}"),"{H}{4} {lexeme = yytext(); return LD5;}
+"LD ("{H}{4}"),A" {lexeme = yytext(); return LD4;}
+"LD ("{H}{4}"),HL" {lexeme = yytext(); return LD5;}
 
 "ADD A,"{REG}{1} {lexeme = yytext(); return ADD1;}
 "ADD A,(HL)" {lexeme = yytext(); return ADD2;}
