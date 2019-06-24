@@ -162,17 +162,17 @@ public class Processor {
                     registersHash.put(lexer.lexeme.split(" ")[1].split(",")[0],
                         lexer.lexeme.split(" ")[1].split(",")[1]);
                     opCode.add(codeMap.get(
-                        lexer.lexeme.split(",")[0] + "," + "*") + 
-                        lexer.lexeme.split(" ")[1].split(",")[1]);
+                        lexer.lexeme.split(",")[0] + ",*") + 
+                        lexer.lexeme.split(",")[1]);
                     break;
                 case LD3:
                     registersHash.put(lexer.lexeme.split(" ")[1].split(",")[0].substring(0, 1), 
-                        registersHash.get(lexer.lexeme.split(" ")[1].split(",")[1].substring(2, 3)));
+                        registersHash.get(lexer.lexeme.split(",")[1].substring(2, 3)));
                     registersHash.put(lexer.lexeme.split(" ")[1].split(",")[0].substring(1, 2), 
-                        registersHash.get(lexer.lexeme.split(" ")[1].split(",")[1].substring(0, 1)));
+                        registersHash.get(lexer.lexeme.split(",")[1].substring(0, 1)));
                     opCode.add(codeMap.get(
-                        lexer.lexeme.split(",")[0] + "," + "**") + 
-                        lexer.lexeme.split(" ")[1].split(",")[1]);
+                        lexer.lexeme.split(",")[0] + ",**") + 
+                        lexer.lexeme.split(",")[1]);
                     break;
                 case LD4:
                     memory.put(lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", ""), 
@@ -192,18 +192,22 @@ public class Processor {
                     break;
                 case ADD1:
                     sumResult = alu.sum(registersHash.get("A"), 
-                        registersHash.get(lexer.lexeme.split(" ")[1].split(",")[1]));
+                        registersHash.get(lexer.lexeme.split(",")[1]));
                     registersHash.put("A", sumResult);
+                    opCode.add(codeMap.get(lexer.lexeme));
                     break;
                 case ADD2:
                     sumResult = alu.sum(registersHash.get("A"), 
                         memory.get(registersHash.get("H") + registersHash.get("L")));
                     registersHash.put("A",sumResult);
+                    opCode.add(codeMap.get(lexer.lexeme));
                     break;
                 case ADD3:
                     sumResult = alu.sum(registersHash.get("A"), 
                         lexer.lexeme.split(" ")[1].split(",")[1]);
                     registersHash.put("A",sumResult);
+                    opCode.add(codeMap.get(lexer.lexeme.split(",")[0] + ",*") + 
+                        lexer.lexeme.split(",")[1]);
                     break;
                 case Other:
                     break;
