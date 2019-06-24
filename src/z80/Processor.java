@@ -4,7 +4,8 @@
  * and open the template in the editor.
  */
 package z80;
-
+import lexer.Tokens;
+import lexer.Lexer;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,7 +19,7 @@ import java.util.HashMap;
  * Jair Villalba
  * Luis Guzman
  */
-class Processor {
+public class Processor {
     private static HashMap<String, String> memory;
     private static HashMap<String, String> codeMap;
     private static HashMap<String, String> registersHash;
