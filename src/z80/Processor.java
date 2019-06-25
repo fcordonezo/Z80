@@ -4,14 +4,9 @@
  * and open the template in the editor.
  */
 package z80;
-import lexer.Tokens;
-import lexer.Lexer;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import main.OpCode;
 
 /**
  *
@@ -20,200 +15,697 @@ import java.util.HashMap;
  * Luis Guzman
  */
 public class Processor {
-    private static HashMap<String, String> memory;
-    private static HashMap<String, String> codeMap;
-    private static HashMap<String, String> registersHash;
-    private String file;
+    private static Flags flags;
+    public static String portIN;
+    public static String portOUT;
+    private static OpCode opCode;
+    private static Memory memory;
     private static Processor processor;
-    private static ALU alu = ALU.getALU();
-    private static ArrayList<String> opCode;
+    private static ALU alu;
     private static Registers registers;
     
-    public static Processor getProcessor( String file ){
+    public static Processor getProcessor(){
         if(processor == null){
-            processor = new Processor(file);
+            processor = new Processor();
         }
         return processor;
     }
-    private Processor( String file ){
-        memory = new HashMap<>();
-        codeMap = new HashMap<>();
-        this.file = file;
-        this.opCode = new ArrayList<>();
+    private Processor(){
+        portIN = "";
+        portOUT = "";
+        flags = Flags.getFlags();
+        alu = ALU.getALU();
+        opCode = OpCode.getOpCode();
+        memory = Memory.getMemory();
         registers = Registers.getRegisters();
-        registersHash = registers.getRegistersHash();
-        codeMap.put("NOP", "00");
-        
-        codeMap.put("LD A,A", "7F");
-        codeMap.put("LD A,B", "78");
-        codeMap.put("LD A,C", "79");
-        codeMap.put("LD A,D", "7A");
-        codeMap.put("LD A,E", "7B");
-        codeMap.put("LD A,H", "7C");
-        codeMap.put("LD A,L", "7D");
-        codeMap.put("LD A,*", "3E");
-        
-        codeMap.put("LD B,A", "47");
-        codeMap.put("LD B,B", "40");
-        codeMap.put("LD B,C", "41");
-        codeMap.put("LD B,D", "42");
-        codeMap.put("LD B,E", "43");
-        codeMap.put("LD B,H", "44");
-        codeMap.put("LD B,L", "45");
-        codeMap.put("LD B,*", "06");
-        
-        codeMap.put("LD C,A", "4F");
-        codeMap.put("LD C,B", "48");
-        codeMap.put("LD C,C", "49");
-        codeMap.put("LD C,D", "4A");
-        codeMap.put("LD C,E", "4B");
-        codeMap.put("LD C,H", "4C");
-        codeMap.put("LD C,L", "4D");
-        codeMap.put("LD C,*", "0E");
-        
-        codeMap.put("LD D,A", "57");
-        codeMap.put("LD D,B", "50");
-        codeMap.put("LD D,C", "51");
-        codeMap.put("LD D,D", "52");
-        codeMap.put("LD D,E", "53");
-        codeMap.put("LD D,H", "54");
-        codeMap.put("LD D,L", "55");
-        codeMap.put("LD D,*", "16");
-        
-        codeMap.put("LD E,A", "5F");
-        codeMap.put("LD E,B", "58");
-        codeMap.put("LD E,C", "59");
-        codeMap.put("LD E,D", "5A");
-        codeMap.put("LD E,E", "5B");
-        codeMap.put("LD E,H", "5C");
-        codeMap.put("LD E,L", "5D");
-        codeMap.put("LD E,*", "1E");
-        
-        codeMap.put("LD H,A", "67");
-        codeMap.put("LD H,B", "60");
-        codeMap.put("LD H,C", "61");
-        codeMap.put("LD H,D", "62");
-        codeMap.put("LD H,E", "63");
-        codeMap.put("LD H,H", "64");
-        codeMap.put("LD H,L", "65");
-        codeMap.put("LD H,*", "26");
-        
-        codeMap.put("LD L,A", "6F");
-        codeMap.put("LD L,B", "68");
-        codeMap.put("LD L,C", "69");
-        codeMap.put("LD L,D", "6A");
-        codeMap.put("LD L,E", "6B");
-        codeMap.put("LD L,H", "6C");
-        codeMap.put("LD L,L", "6D");
-        codeMap.put("LD L,*", "2E");
-        
-        codeMap.put("LD (BC),**", "01");
-        codeMap.put("LD (DE),**", "11");
-        codeMap.put("LD (HL),**", "21");
-        codeMap.put("LD (SP),**", "31");
-        
-        codeMap.put("LD (**),A", "32");
-        codeMap.put("LD (**),HL", "22");
-        
-        codeMap.put("ADD A,A", "87");
-        codeMap.put("ADD A,B", "80");
-        codeMap.put("ADD A,C", "81");
-        codeMap.put("ADD A,D", "82");
-        codeMap.put("ADD A,E", "83");
-        codeMap.put("ADD A,H", "84");
-        codeMap.put("ADD A,L", "85");
-        codeMap.put("ADD A,(HL)", "86");
-        codeMap.put("ADD A,*", "C6");
     }
-    public HashMap<String, String> getRegisters(){
-        return registersHash;
+    
+    public String getPortIN(){
+        return portIN;
     }
-    public HashMap<String, String> getMemory(){
+    public void setPortIN( String portIN ){
+        this.portIN = portIN;
+    }
+    
+    public String getPortOUT(){
+        return portOUT;
+    }
+    
+    public Memory getMemory(){
         return memory;
     }
-    public ArrayList<String> getOpCode(){
-        return opCode;
+    public Registers getRegisters(){
+        return registers;
     }
+
     public void process() throws FileNotFoundException, IOException{
-        String sumResult;
-        
-        BufferedReader reader = new BufferedReader( new FileReader( file ) );
-        Lexer lexer = new Lexer( reader );
-        while( true ){
-            Tokens tokens = lexer.yylex();
-            if( tokens == null ){
-                //writer.write( result );
-                //writer.flush();
-                //writer.close();
-                break;
-            }
-            switch( tokens ){
-                case NOP:
+        String HL;
+        String resultRegisters;
+        String resultMemory;
+        String resultFlags;
+        for( int i = 0; i < opCode.getOpCodeArray().size(); i++ ){
+            resultRegisters = "[REGISTROS: ";
+            resultMemory = "[MEMORIA: ";
+            resultFlags = "[BANDERAS: ";
+            switch( opCode.getOpCodeArray().get(i).substring(0, 2) ){
+                case "00": //NOP
+                    break; 
+                case "7F": //LD A,A
+                    registers.getRegistersHash().put(
+                        "A", registers.getRegistersHash().get("A") );
                     break;
-                case ORG:
-                    registersHash.put("Init", lexer.lexeme.split(" ")[1]);
+                case "78": //LD A,B
+                    registers.getRegistersHash().put(
+                        "A", registers.getRegistersHash().get("B") );
                     break;
-                case LD1:
-                    registersHash.put(lexer.lexeme.split(" ")[1].split(",")[0], 
-                        registersHash.get(lexer.lexeme.split(" ")[1].split(",")[1]));
-                    opCode.add(codeMap.get(lexer.lexeme));
+                case "79": //LD A,C
+                    registers.getRegistersHash().put(
+                        "A", registers.getRegistersHash().get("C") );
                     break;
-                case LD2:
-                    registersHash.put(lexer.lexeme.split(" ")[1].split(",")[0],
-                        lexer.lexeme.split(" ")[1].split(",")[1]);
-                    opCode.add(codeMap.get(
-                        lexer.lexeme.split(",")[0] + ",*") + 
-                        lexer.lexeme.split(",")[1]);
+                case "7A": //LD A,D
+                    registers.getRegistersHash().put(
+                        "A", registers.getRegistersHash().get("D") );
                     break;
-                case LD3:
-                    registersHash.put(lexer.lexeme.split(" ")[1].split(",")[0].substring(0, 1), 
-                        registersHash.get(lexer.lexeme.split(",")[1].substring(2, 3)));
-                    registersHash.put(lexer.lexeme.split(" ")[1].split(",")[0].substring(1, 2), 
-                        registersHash.get(lexer.lexeme.split(",")[1].substring(0, 1)));
-                    opCode.add(codeMap.get(
-                        lexer.lexeme.split(",")[0] + ",**") + 
-                        lexer.lexeme.split(",")[1]);
+                case "7B": //LD A,E
+                    registers.getRegistersHash().put(
+                        "A", registers.getRegistersHash().get("E") );
                     break;
-                case LD4:
-                    memory.put(lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", ""), 
-                        registersHash.get("A"));
-                    opCode.add( codeMap.get(
-                            lexer.lexeme.split(" ")[0] + " (**),A" ) + 
-                        lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", ""));
+                case "7C": //LD A,H
+                    registers.getRegistersHash().put(
+                        "A", registers.getRegistersHash().get("H") );
                     break;
-                case LD5:
-                    memory.put(lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", "").substring(0, 2), 
-                        memory.get(registersHash.get("L")));
-                    memory.put(lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", "").substring(2, 4), 
-                        memory.get(registersHash.get("H"))); 
-                    opCode.add( codeMap.get(
-                            lexer.lexeme.split(" ")[0] + " (**),HL" ) + 
-                        lexer.lexeme.split(" ")[1].split(",")[0].replace("(", "").replace(")", ""));
+                case "7D": //LD A,L
+                    registers.getRegistersHash().put(
+                        "A", registers.getRegistersHash().get("L") );
                     break;
-                case ADD1:
-                    sumResult = alu.sum(registersHash.get("A"), 
-                        registersHash.get(lexer.lexeme.split(",")[1]));
-                    registersHash.put("A", sumResult);
-                    opCode.add(codeMap.get(lexer.lexeme));
+                case "3E": //LD A,*
+                    registers.getRegistersHash().put(
+                        "A", opCode.getOpCodeArray().get(i).substring(2, 4) );
                     break;
-                case ADD2:
-                    sumResult = alu.sum(registersHash.get("A"), 
-                        memory.get(registersHash.get("H") + registersHash.get("L")));
-                    registersHash.put("A",sumResult);
-                    opCode.add(codeMap.get(lexer.lexeme));
+                case "47": //LD B,A
+                    registers.getRegistersHash().put(
+                        "B", registers.getRegistersHash().get("A") );
                     break;
-                case ADD3:
-                    sumResult = alu.sum(registersHash.get("A"), 
-                        lexer.lexeme.split(" ")[1].split(",")[1]);
-                    registersHash.put("A",sumResult);
-                    opCode.add(codeMap.get(lexer.lexeme.split(",")[0] + ",*") + 
-                        lexer.lexeme.split(",")[1]);
+                case "40": //LD B,B
+                    registers.getRegistersHash().put(
+                        "B", registers.getRegistersHash().get("B") );
                     break;
-                case Other:
+                case "41": //LD B,C
+                    registers.getRegistersHash().put(
+                        "B", registers.getRegistersHash().get("C") );
+                    break;
+                case "42": //LD B,D
+                    registers.getRegistersHash().put(
+                        "B", registers.getRegistersHash().get("D") );
+                    break;
+                case "43": //LD B,E
+                    registers.getRegistersHash().put(
+                        "B", registers.getRegistersHash().get("E") );
+                    break;
+                case "44": //LD B,H
+                    registers.getRegistersHash().put(
+                        "B", registers.getRegistersHash().get("H") );
+                    break;
+                case "45": //LD B,L
+                    registers.getRegistersHash().put(
+                        "B", registers.getRegistersHash().get("L") );
+                    break;
+                case "06": //LD B,*
+                    registers.getRegistersHash().put(
+                        "B", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    break;
+                    
+                case "4F": //LD C,A
+                    registers.getRegistersHash().put(
+                        "C", registers.getRegistersHash().get("A") );
+                    break;
+                case "48": //LD C,B
+                    registers.getRegistersHash().put(
+                        "C", registers.getRegistersHash().get("B") );
+                    break;
+                case "49": //LD C,C
+                    registers.getRegistersHash().put(
+                        "C", registers.getRegistersHash().get("C") );
+                    break;
+                case "4A": //LD C,D
+                    registers.getRegistersHash().put(
+                        "C", registers.getRegistersHash().get("D") );
+                    break;
+                case "4B": //LD C,E
+                    registers.getRegistersHash().put(
+                        "C", registers.getRegistersHash().get("E") );
+                    break;
+                case "4C": //LD C,H
+                    registers.getRegistersHash().put(
+                        "C", registers.getRegistersHash().get("H") );
+                    break;
+                case "4D": //LD C,L
+                    registers.getRegistersHash().put(
+                        "C", registers.getRegistersHash().get("L") );
+                    break;
+                case "0E": //LD C,*
+                    registers.getRegistersHash().put(
+                        "C", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    break;
+                    
+                case "57": //LD D,A
+                    registers.getRegistersHash().put(
+                        "D", registers.getRegistersHash().get("A") );
+                    break;
+                case "50": //LD D,B
+                    registers.getRegistersHash().put(
+                        "D", registers.getRegistersHash().get("B") );
+                    break;
+                case "51": //LD D,C
+                    registers.getRegistersHash().put(
+                        "D", registers.getRegistersHash().get("C") );
+                    break;
+                case "52": //LD D,D
+                    registers.getRegistersHash().put(
+                        "D", registers.getRegistersHash().get("D") );
+                    break;
+                case "53": //LD D,E
+                    registers.getRegistersHash().put(
+                        "D", registers.getRegistersHash().get("E") );
+                    break;
+                case "54": //LD D,H
+                    registers.getRegistersHash().put(
+                        "D", registers.getRegistersHash().get("H") );
+                    break;
+                case "55": //LD D,L
+                    registers.getRegistersHash().put(
+                        "D", registers.getRegistersHash().get("L") );
+                    break;
+                case "16": //LD D,*
+                    registers.getRegistersHash().put(
+                        "D", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    break;
+                    
+                case "5F": //LD E,A
+                    registers.getRegistersHash().put(
+                        "E", registers.getRegistersHash().get("A") );
+                    break;
+                case "58": //LD E,B
+                    registers.getRegistersHash().put(
+                        "E", registers.getRegistersHash().get("B") );
+                    break;
+                case "59": //LD E,C
+                    registers.getRegistersHash().put(
+                        "E", registers.getRegistersHash().get("C") );
+                    break;
+                case "5A": //LD E,D
+                    registers.getRegistersHash().put(
+                        "E", registers.getRegistersHash().get("D") );
+                    break;
+                case "5B": //LD E,E
+                    registers.getRegistersHash().put(
+                        "E", registers.getRegistersHash().get("E") );
+                    break;
+                case "5C": //LD E,H
+                    registers.getRegistersHash().put(
+                        "E", registers.getRegistersHash().get("H") );
+                    break;
+                case "5D": //LD E,L
+                    registers.getRegistersHash().put(
+                        "E", registers.getRegistersHash().get("L") );
+                    break;
+                case "1E": //LD E,*
+                    registers.getRegistersHash().put(
+                        "E", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    break;
+                    
+                case "67": //LD H,A
+                    registers.getRegistersHash().put(
+                        "H", registers.getRegistersHash().get("A") );
+                    break;
+                case "60": //LD H,B
+                    registers.getRegistersHash().put(
+                        "H", registers.getRegistersHash().get("B") );
+                    break;
+                case "61": //LD H,C
+                    registers.getRegistersHash().put(
+                        "H", registers.getRegistersHash().get("C") );
+                    break;
+                case "62": //LD H,D
+                    registers.getRegistersHash().put(
+                        "H", registers.getRegistersHash().get("D") );
+                    break;
+                case "63": //LD H,E
+                    registers.getRegistersHash().put(
+                        "H", registers.getRegistersHash().get("E") );
+                    break;
+                case "64": //LD H,H
+                    registers.getRegistersHash().put(
+                        "H", registers.getRegistersHash().get("H") );
+                    break;
+                case "65": //LD H,L
+                    registers.getRegistersHash().put(
+                        "H", registers.getRegistersHash().get("L") );
+                    break;
+                case "26": //LD H,*
+                    registers.getRegistersHash().put(
+                        "H", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    break;
+                    
+                case "6F": //LD L,A
+                    registers.getRegistersHash().put(
+                        "L", registers.getRegistersHash().get("A") );
+                    break;
+                case "68": //LD L,B
+                    registers.getRegistersHash().put(
+                        "L", registers.getRegistersHash().get("B") );
+                    break;
+                case "69": //LD L,C
+                    registers.getRegistersHash().put(
+                        "L", registers.getRegistersHash().get("C") );
+                    break;
+                case "6A": //LD L,D
+                    registers.getRegistersHash().put(
+                        "L", registers.getRegistersHash().get("D") );
+                    break;
+                case "6B": //LD L,E
+                    registers.getRegistersHash().put(
+                        "L", registers.getRegistersHash().get("E") );
+                    break;
+                case "6C": //LD L,H
+                    registers.getRegistersHash().put(
+                        "L", registers.getRegistersHash().get("H") );
+                    break;
+                case "6D": //LD L,L
+                    registers.getRegistersHash().put(
+                        "L", registers.getRegistersHash().get("L") );
+                    break;
+                case "2E": //LD L,*
+                    registers.getRegistersHash().put(
+                        "L", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    break;
+                    
+                case "01": //LD (BC),**
+                    registers.getRegistersHash().put(
+                        "C", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    registers.getRegistersHash().put(
+                        "B", opCode.getOpCodeArray().get(i).substring(4, 6) );
+                    break;
+                case "11": //LD (DE),**
+                    registers.getRegistersHash().put(
+                        "E", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    registers.getRegistersHash().put(
+                        "D", opCode.getOpCodeArray().get(i).substring(4, 6) );
+                    break;
+                case "21": //LD (HL),**
+                    registers.getRegistersHash().put(
+                        "D", opCode.getOpCodeArray().get(i).substring(2, 4) );
+                    registers.getRegistersHash().put(
+                        "L", opCode.getOpCodeArray().get(i).substring(4, 6) );
+                    break;
+                case "31": //LD (SP),**
+                    registers.getRegistersHash().put(
+                        "SP", opCode.getOpCodeArray().get(i).substring(2, 6) );
+                    break;
+                    
+                case "32": //LD (**),A
+                    memory.getMemoryHash().put(
+                        opCode.getOpCodeArray().get(i).substring(2, 6),
+                        registers.getRegistersHash().get("A"));
+                    break;
+                case "22": //LD (**),HL
+                    memory.getMemoryHash().put(
+                        opCode.getOpCodeArray().get(i).substring(2, 6),
+                        registers.getRegistersHash().get("H") + 
+                            registers.getRegistersHash().get("L"));
+                    break;
+                    
+                case "87": //ADD A,A
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("A")));
+                    
+                    break;
+                case "80": //ADD A,B
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("B")));
+                    break;
+                case "81": //ADD A,C
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("C")));
+                    break;
+                case "82": //ADD A,D
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("D")));
+                    break;
+                case "83": //ADD A,E
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("E")));
+                    break;
+                case "84": //ADD A,H
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("H")));
+                    break;
+                case "85": //ADD A,L
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("L")));
+                    break;
+                case "86": //ADD A,(HL)
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            memory.getMemoryHash().get(
+                                registers.getRegistersHash().get("H") + 
+                                    registers.getRegistersHash().get("L"))));
+                    break;
+                case "C6": //ADD A,*
+                    registers.getRegistersHash().put("A",
+                        alu.add(registers.getRegistersHash().get("A"),
+                            opCode.getOpCodeArray().get(i).substring(2, 4)));
+                    break;
+                    
+                case "97": //SUB A,A
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("A")));
+                    break;
+                case "90": //SUB A,B
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("B")));
+                    break;
+                case "91": //SUB A,C
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("C")));
+                    break;
+                case "92": //SUB A,D
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("D")));
+                    break;
+                case "93": //SUB A,E
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("E")));
+                    break;
+                case "94": //SUB A,H
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("H")));
+                    break;
+                case "95": //SUB A,L
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("L")));
+                    break;
+                case "96": //SUB A,(HL)
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            memory.getMemoryHash().get(
+                                registers.getRegistersHash().get("H") + 
+                                    registers.getRegistersHash().get("L"))));
+                    break;
+                case "D6": //SUB A,*
+                    registers.getRegistersHash().put("A",
+                        alu.sub(registers.getRegistersHash().get("A"),
+                            opCode.getOpCodeArray().get(i).substring(2, 4)));
+                    break;
+                    
+                case "A7": //AND A,A
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("A")));
+                    break;
+                case "A0": //AND A,B
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("B")));
+                    break;
+                case "A1": //AND A,C
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("C")));
+                    break;
+                case "A2": //AND A,D
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("D")));
+                    break;
+                case "A3": //AND A,E
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("E")));
+                    break;
+                case "A4": //AND A,H
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("H")));
+                    break;
+                case "A5": //AND A,L
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("L")));
+                    break;
+                case "A6": //AND A,(HL)
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            memory.getMemoryHash().get(
+                                registers.getRegistersHash().get("H") + 
+                                    registers.getRegistersHash().get("L"))));
+                    break;
+                case "E6": //AND A,*
+                    registers.getRegistersHash().put("A",
+                        alu.and(registers.getRegistersHash().get("A"),
+                            opCode.getOpCodeArray().get(i).substring(2, 4)));
+                    break;
+                    
+                case "B7": //OR A,A
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("A")));
+                    break;
+                case "B0": //OR A,B
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("B")));
+                    break;
+                case "B1": //OR A,C
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("C")));
+                    break;
+                case "B2": //OR A,D
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("D")));
+                    break;
+                case "B3": //OR A,E
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("E")));
+                    break;
+                case "B4": //OR A,H
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("H")));
+                    break;
+                case "B5": //OR A,L
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("L")));
+                    break;
+                case "B6": //OR A,(HL)
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            memory.getMemoryHash().get(
+                                registers.getRegistersHash().get("H") + 
+                                    registers.getRegistersHash().get("L"))));
+                    break;
+                case "F6": //OR A,*
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            opCode.getOpCodeArray().get(i).substring(2, 4)));
+                    break;
+                    
+                case "AF": //XOR A,A
+                    registers.getRegistersHash().put("A",
+                        alu.xor(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("A")));
+                    break;
+                case "A8": //XOR A,B
+                    registers.getRegistersHash().put("A",
+                        alu.xor(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("B")));
+                    break;
+                case "A9": //XOR A,C
+                    registers.getRegistersHash().put("A",
+                        alu.xor(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("C")));
+                    break;
+                case "AA": //XOR A,D
+                    registers.getRegistersHash().put("A",
+                        alu.xor(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("D")));
+                    break;
+                case "AB": //XOR A,E
+                    registers.getRegistersHash().put("A",
+                        alu.xor(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("E")));
+                    break;
+                case "AC": //XOR A,H
+                    registers.getRegistersHash().put("A",
+                        alu.xor(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("H")));
+                    break;
+                case "AD": //XOR A,L
+                    registers.getRegistersHash().put("A",
+                        alu.xor(registers.getRegistersHash().get("A"),
+                            registers.getRegistersHash().get("L")));
+                    break;
+                case "AE": //XOR A,(HL)
+                    registers.getRegistersHash().put("A",
+                        alu.xor(registers.getRegistersHash().get("A"),
+                            memory.getMemoryHash().get(
+                                registers.getRegistersHash().get("H") + 
+                                    registers.getRegistersHash().get("L"))));
+                    break;
+                case "EE": //XOR A,*
+                    registers.getRegistersHash().put("A",
+                        alu.or(registers.getRegistersHash().get("A"),
+                            opCode.getOpCodeArray().get(i).substring(2, 4)));
+                    break;
+                    
+                case "3C": //INC A
+                    registers.getRegistersHash().put("A",
+                        alu.inc(registers.getRegistersHash().get("A")));
+                    break;
+                case "04": //INC B
+                    registers.getRegistersHash().put("B",
+                        alu.inc(registers.getRegistersHash().get("B")));
+                    break;
+                case "0C": //INC C
+                    registers.getRegistersHash().put("C",
+                        alu.inc(registers.getRegistersHash().get("C")));
+                    break;
+                case "14": //INC D
+                    registers.getRegistersHash().put("D",
+                        alu.inc(registers.getRegistersHash().get("D")));
+                    break;
+                case "1C": //INC E
+                    registers.getRegistersHash().put("E",
+                        alu.inc(registers.getRegistersHash().get("E")));
+                    break;
+                case "24": //INC H
+                    registers.getRegistersHash().put("H",
+                        alu.inc(registers.getRegistersHash().get("H")));
+                    break;
+                case "2C": //INC L
+                    registers.getRegistersHash().put("L",
+                        alu.inc(registers.getRegistersHash().get("L")));
+                    break;
+                case "34": //INC (HL)
+                    HL = registers.getRegistersHash().get("H") + 
+                        registers.getRegistersHash().get("L");
+                    HL = alu.inc(HL);
+                    registers.getRegistersHash().put("H",
+                        HL.substring(0, 2));
+                    registers.getRegistersHash().put("L",
+                        HL.substring(2, 4));
+                    break;
+                    
+                case "3D": //DEC A
+                    registers.getRegistersHash().put("A",
+                        alu.dec(registers.getRegistersHash().get("A")));
+                    break;
+                case "05": //DEC B
+                    registers.getRegistersHash().put("B",
+                        alu.dec(registers.getRegistersHash().get("B")));
+                    break;
+                case "0D": //DEC C
+                    registers.getRegistersHash().put("C",
+                        alu.inc(registers.getRegistersHash().get("C")));
+                    break;
+                case "15": //DEC D
+                    registers.getRegistersHash().put("D",
+                        alu.dec(registers.getRegistersHash().get("D")));
+                    break;
+                case "1D": //DEC E
+                    registers.getRegistersHash().put("E",
+                        alu.dec(registers.getRegistersHash().get("E")));
+                    break;
+                case "25": //DEC H
+                    registers.getRegistersHash().put("H",
+                        alu.dec(registers.getRegistersHash().get("H")));
+                    break;
+                case "2D": //DEC L
+                    registers.getRegistersHash().put("L",
+                        alu.dec(registers.getRegistersHash().get("L")));
+                    break;
+                case "35": //DEC (HL)
+                    HL = registers.getRegistersHash().get("H") + 
+                        registers.getRegistersHash().get("L");
+                    HL = alu.dec(HL);
+                    registers.getRegistersHash().put("H",
+                        HL.substring(0, 2));
+                    registers.getRegistersHash().put("L",
+                        HL.substring(2, 4));
+                    break;
+                    
+                case "DB": //IN A,(*)
+                    registers.getRegistersHash().put("A", portIN);
+                    break;
+                case "D3": //OUT (*),A
+                    portOUT = registers.getRegistersHash().get("A");
+                    break;
+                case "76":
+                    break;
+                case "2F":
+                    registers.getRegistersHash().put("A",
+                        alu.cpl(registers.getRegistersHash().get("A")));
+                    break;
+                case "ED":
+                    switch(opCode.getOpCodeArray().get(i).substring(2, 4)){
+                        case "44":
+                            registers.getRegistersHash().put("A",
+                                alu.neg(registers.getRegistersHash().get("A")));
+                            break;
+                        default:
+                            throw new IllegalArgumentException();
+                    }
+                    break;
+                case "0F":
+                    registers.getRegistersHash().put("A",
+                        alu.rrca(registers.getRegistersHash().get("A")));
+                    break;
+                case "07":
+                    registers.getRegistersHash().put("A",
+                        alu.rlca(registers.getRegistersHash().get("A")));
                     break;
                 default:
                     throw new IllegalArgumentException();
             }
+            resultRegisters += "A = " + registers.getRegistersHash().get("A") + ", ";
+            resultRegisters += "B = " + registers.getRegistersHash().get("B") + ", ";
+            resultRegisters += "C = " + registers.getRegistersHash().get("C") + ", ";
+            resultRegisters += "D = " + registers.getRegistersHash().get("D") + ", ";
+            resultRegisters += "E = " + registers.getRegistersHash().get("E") + ", ";
+            resultRegisters += "H = " + registers.getRegistersHash().get("H") + ", ";
+            resultRegisters += "L = " + registers.getRegistersHash().get("L") + ", ";
+            resultRegisters += "IX = " + registers.getRegistersHash().get("IX") + ", ";
+            resultRegisters += "IY = " + registers.getRegistersHash().get("IY") + ", ";
+            resultRegisters += "SP = " + registers.getRegistersHash().get("SP") + ", ";
+            resultRegisters += "PC = " + registers.getRegistersHash().get("PC") + "]";
+            resultFlags += "P/V = " + flags.getFlagsMap().get("P/V") + ", ";
+            resultFlags += "S = " + flags.getFlagsMap().get("S") + ", ";
+            resultFlags += "Z = " + flags.getFlagsMap().get("Z") + ", ";
+            resultFlags += "AC = " + flags.getFlagsMap().get("AC") + ", ";
+            resultFlags += "C = " + flags.getFlagsMap().get("C") + "]";
+            resultMemory += memory.getMemoryHash() + "]\n";
+            System.out.println(resultRegisters);
+            System.out.println(resultFlags);
+            System.out.println(resultMemory);
+            
         }  
     }
 }
