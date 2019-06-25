@@ -28,6 +28,5 @@ public class Main {
         Processor processor = Processor.getProcessor();
         Compiler.codeToBits();
         processor.process();
-        System.out.println(processor.getRegisters().getRegistersHash().get("A"));
     }
 }
