@@ -25,9 +25,9 @@ public class Main {
     
     public static void main(String[] args) throws FileNotFoundException, IOException {
         String file = "programs\\sum.txt";
-        Processor processor = Processor.getProcessor(file);
+        Processor processor = Processor.getProcessor();
+        Compiler.codeToBits();
         processor.process();
-        System.out.println(
-           Integer.toBinaryString(Integer.parseInt(processor.getOpCode().get(0), 16)));
+        System.out.println(processor.getRegisters().getRegistersHash().get("A"));
     }
 }
