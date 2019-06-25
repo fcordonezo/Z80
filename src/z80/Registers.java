@@ -13,11 +13,11 @@ import java.util.HashMap;
  * Jair Villalba
  * Luis Guzman
  */
-class Registers {
+public class Registers {
     private static Registers registers;
     private static HashMap<String, String> registersHash;
     private Registers(){
-        registersHash = new HashMap<String, String>();
+        registersHash = new HashMap<>();
         registersHash.put("A", "");
         registersHash.put("B", "");
         registersHash.put("C", "");
@@ -29,7 +29,6 @@ class Registers {
         registersHash.put("IY", "");
         registersHash.put("SP", "");
         registersHash.put("PC", "");
-        registersHash.put("Init", "");
     }
     public static Registers getRegisters(){
         if( registers == null ){
@@ -38,6 +37,6 @@ class Registers {
         return registers;
     }
     public HashMap<String, String> getRegistersHash(){
-        return this.registersHash;
+        return registersHash;
     }
 }
