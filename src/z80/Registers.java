@@ -23,11 +23,14 @@ public class Registers {
         registersHash.put("C", "");
         registersHash.put("D", "");
         registersHash.put("E", "");
+        registersHash.put("F", "");
         registersHash.put("H", "");
         registersHash.put("L", "");
+        registersHash.put("IR", "");
         registersHash.put("IX", "");
         registersHash.put("IY", "");
         registersHash.put("SP", "");
+        registersHash.put("BR", "");
         registersHash.put("PC", "");
     }
     public static Registers getRegisters(){
