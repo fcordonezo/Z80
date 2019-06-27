@@ -5,12 +5,9 @@
  */
 package main;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import jflex.ErrorMessages;
+import java.util.ArrayList;
 import z80.Processor;
 
 /**
