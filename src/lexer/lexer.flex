@@ -63,6 +63,12 @@ espacio = [\t\r\n]
 "IN A,("{H}{2}")" {lexeme = yytext(); return IN;}
 "OUT ("{H}{2}"),A" {lexeme = yytext(); return OUT;}
 
+"JR "{H}{2} {lexeme = yytext(); return JR1;}
+"JR Z,"{H}{2} {lexeme = yytext(); return JR2;}
+"JR C,"{H}{2} {lexeme = yytext(); return JR3;}
+"JR NZ"{H}{2} {lexeme = yytext(); return JR4;}
+"JR NC"{H}{2} {lexeme = yytext(); return JR5;}
+
 "RRCA" {lexeme = yytext(); return RRCA;}
 "RLCA" {lexeme = yytext(); return RLCA;}
 

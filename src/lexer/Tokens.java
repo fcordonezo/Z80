@@ -45,5 +45,10 @@ public enum Tokens {
     HALT,
     CPL,
     NEG,
+    JR1,
+    JR2,
+    JR3,
+    JR4,
+    JR5,
     Other
 }
