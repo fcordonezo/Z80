@@ -168,6 +168,11 @@ class Codes {
         codeMap.put("RRCA", "0F");
         codeMap.put("RLCA", "07");
         
+        codeMap.put("JR *", "18");
+        codeMap.put("JR Z,*", "28");
+        codeMap.put("JR C,*", "38");
+        codeMap.put("JR NZ,*", "20");
+        codeMap.put("JR NC,*", "30");
     }
     public static Codes getCodes(){
         if(codes == null){
